@@ -42,33 +42,12 @@ sequenceDiagram
     Provider-->>Consumer: Bundle of Observations
 ```
 
-### Constraints
-
-- **Patient-scoped queries** - `patient` parameter required on all searches
-- Searches without `patient` parameter are rejected
-
-
-### Core Resources
-
-The following resources are available for read/search access. Data models inherit from [HL7 Europe Core](https://build.fhir.org/ig/hl7-eu/base/). Required search parameters are from [International Patient Access (IPA)](https://hl7.org/fhir/uv/ipa/).
-
-| Resource | Required Search Parameters |
-|----------|---------------------------|
-| AllergyIntolerance | `patient` |
-| Condition | `patient` |
-| Observation | `patient`, `category` |
-| DiagnosticReport | `patient`, `category` |
-| MedicationRequest | `patient` |
-| MedicationDispense | `patient` |
-| MedicationStatement | `patient` |
-| Immunization | `patient` |
-| Encounter | `patient` |
-
-<div markdown="1" class="stu-note">
-
-This is a core subset of resources for ballot. Ballot feedback is requested on whether this set is appropriate. See [Open Issue #9](open-issues.html#issue-9-core-resource-set-validation).
-
-</div>
+<!-- 
+KAR 2026-09-08 Addressing Resource Access tickets:
+FHIR-56637, FHIR-56651: Align required search parameters with IPA and describe them, including which are patient-scoped and which are not. Remove "Constraints" since this information is now included with resources.
+FHIR-56638, FHIR-56641: Link directly to EU Core profiles and list relevant other resources that are not defined in EU Core, using working list from Issue 9. Clarify which are required to support search, and which are not.
+FHIR-56639: Remove "Scopes" section since applicable resources are now listed above. 
+-->
 
 ### Supported Resources
 
@@ -78,19 +57,73 @@ Servers declare which resources they support in their CapabilityStatement (see [
 
 See the [Resource Access Provider CapabilityStatement](CapabilityStatement-resource-access-provider-eu-api.html) and [Resource Consumer CapabilityStatement](CapabilityStatement-resource-consumer-eu-api.html) for detailed capability declarations.
 
-### Scopes
+#### Core Resources
 
-```
-system/AllergyIntolerance.rs
-system/Condition.rs
-system/Observation.rs
-system/DiagnosticReport.rs
-system/MedicationRequest.rs
-system/MedicationDispense.rs
-system/MedicationStatement.rs
-system/Immunization.rs
-system/Encounter.rs
-```
+In the regulatory context of EHDS, the following resources represent individual data entries included in the priority data categories, so should be made available for read/search access if the system claims support for the corresponding priority data category. Data models inherit from [HL7 Europe Core](https://build.fhir.org/ig/hl7-eu/base/). Required search parameters are from [International Patient Access (IPA)](https://hl7.org/fhir/uv/ipa/).
+
+**All priority data categories**
+- Patient:
+  - Data model: [Patient (EU Core)](https://hl7.eu/fhir/base/StructureDefinition-patient-eu-core.html)
+  - Search parameters: As described at [IPA CapabilityStatement: Patient](https://hl7.org/fhir/uv/ipa/STU1/CapabilityStatement-ipa-server.html#Patient1-9). Resource Access Providers are required to support searching by FHIR ID, or by patient.identifier, as long as the Resource Consumer provides both the system and code values for the identifier.
+- Practitioner:
+  - Data model: [Practitioner (EU Core)](https://hl7.eu/fhir/base/StructureDefinition-practitioner-eu-core.html)
+  - Search parameters: This is not a patient-scoped resource, so there is no requirement for Resource Access Providers to support Search, only Read.
+- Organization:
+  - Data model: [Organization (EU Core)](https://hl7.eu/fhir/base/StructureDefinition-organization-eu-core.html)
+  - Search parameters: This is not a patient-scoped resource, so there is no requirement for Resource Access Providers to support Search, only Read.
+
+**Patient Summary**
+- Condition:
+  - Data model: [Condition (EU Core)](https://hl7.eu/fhir/base/StructureDefinition-condition-eu-core.html)
+  - Search parameters: As described at [IPA CapabilityStatement: Condition](https://hl7.org/fhir/uv/ipa/STU1/CapabilityStatement-ipa-server.html#Condition1-2). Resource Access Providers are required to support searching by patient, as long as the Resource Consumer provides at least an id value for the Patient resource.
+- AllergyIntolerance:
+  - Data model: [AllergyIntolerance (EU Core)](https://hl7.eu/fhir/base/StructureDefinition-allergyIntolerance-eu-core.html)
+  - Search parameters: As described at [IPA CapabilityStatement: AllergyIntolerance](https://hl7.org/fhir/uv/ipa/STU1/CapabilityStatement-ipa-server.html#AllergyIntolerance1-1). Resource Access Providers are required to support searching by patient, as long as the Resource Consumer provides at least an id value for the Patient resource.
+- MedicationRequest: 
+  - Data model: [MedicationRequest (EU Core)](https://hl7.eu/fhir/base/StructureDefinition-medicationRequest-eu-core.html)
+  - Search parameters: As described at [IPA CapabilityStatement: MedicationRequest](https://hl7.org/fhir/uv/ipa/STU1/CapabilityStatement-ipa-server.html#MedicationRequest1-6). Resource Access Providers are required to support searching by patient, as long as the Resource Consumer provides at least an id value for the Patient resource.
+- MedicationStatement: 
+  - Data model: [MedicationStatement (EU Core)](https://hl7.eu/fhir/base/StructureDefinition-medicationStatement-eu-core.html)
+  - Search parameters: As described at [IPA CapabilityStatement: MedicationStatement](https://hl7.org/fhir/uv/ipa/STU1/CapabilityStatement-ipa-server.html#MedicationStatement1-7). Resource Access Providers are required to support searching by patient, as long as the Resource Consumer provides at least an id value for the Patient resource.
+- Immunization: 
+  - Data model: [Immunization (EU Core)](https://hl7.eu/fhir/base/StructureDefinition-immunization-eu-core.html)
+  - Search parameters: As described at [IPA CapabilityStatement: Immunization](https://hl7.org/fhir/uv/ipa/STU1/CapabilityStatement-ipa-server.html#Immunization1-4). Resource Access Providers are required to support searching by patient, as long as the Resource Consumer provides at least an id value for the Patient resource.
+
+**ePrescription and eDispensation**
+- MedicationRequest: 
+  - Data model: [MedicationRequest (EU Core)](https://hl7.eu/fhir/base/StructureDefinition-medicationRequest-eu-core.html)
+  - Search parameters: As described at [IPA CapabilityStatement: MedicationRequest](https://hl7.org/fhir/uv/ipa/STU1/CapabilityStatement-ipa-server.html#MedicationRequest1-6). Resource Access Providers are required to support searching by patient, as long as the Resource Consumer provides at least an id value for the Patient resource.
+- MedicationDispense:
+  - Data model: Not included in EU Core. Refer to [MedicationDispense: MPD](https://hl7.eu/fhir/mpd/StructureDefinition-MedicationDispense-eu-mpd.html)
+  - Search parameters: Not included in IPA. As this is a patient-scoped resoure, Resource Access Providers are required to support searching by patient, as long as the Resource Consumer provides at least an id value for the Patient resource.
+
+**Medical Test Results**
+- Observation: 
+  - Data model: [Observation: Medical Test Result (EU Core)](https://hl7.eu/fhir/base/StructureDefinition-medicalTestResult-eu-core.html)
+  - Search parameters: As described at [IPA CapabilityStatement: Observation](https://hl7.org/fhir/uv/ipa/STU1/CapabilityStatement-ipa-server.html#Observation1-8). Resource access providers are required to support Search requests that include both patient and category, both patient and code, or all of patient, category, and date.
+- DiagnosticReport:
+  - Data model: [DiagnosticReport (EU Core)](https://hl7.eu/fhir/base/StructureDefinition-diagnosticReport-eu-core.html)
+  - Search parameters: Not included in IPA. As this is a patient-scoped resoure, Resource Access Providers are required to support searching by patient, as long as the Resource Consumer provides at least an id value for the Patient resource.
+
+**Imaging Results**
+- DiagnosticReport:
+  - Data model: [DiagnosticReport (EU Core)](https://hl7.eu/fhir/base/StructureDefinition-diagnosticReport-eu-core.html)
+  - Search parameters: Not included in IPA. As this is a patient-scoped resoure, Resource Access Providers are required to support searching by patient, as long as the Resource Consumer provides at least an id value for the Patient resource.
+- ImagingStudy:
+  - Data model: Not included in EU Core. Refer to [ImagingStudy: General](https://hl7.eu/fhir/imaging/en/StructureDefinition-ImagingStudyEuImaging.html) from HL7 Europe Imaging Report
+  - Search parameters: Not included in IPA. As this is a patient-scoped resoure, Resource Access Providers are required to support searching by patient, as long as the Resource Consumer provides at least an id value for the Patient resource.
+
+**Discharge Reports**
+- Encounter:
+  - Data model: Not included in EU Core. Refer to [Encounter (HDR)](https://hl7.eu/fhir/hdr/StructureDefinition-encounter-eu-hdr.html)
+  - Search paramters: Not included in IPA. As this is a patient-scoped resoure, Resource Access Providers are required to support searching by patient, as long as the Resource Consumer provides at least an id value for the Patient resource.
+
+
+<div markdown="1" class="stu-note">
+
+This is a core subset of resources for ballot. Ballot feedback is requested on whether this set is appropriate. See [Open Issue #9](open-issues.html#issue-9-core-resource-set-validation).
+
+</div>
 
 ### Example Queries
 
@@ -103,8 +136,11 @@ GET /MedicationRequest?patient=123&status=active
 ```
 
 ### Derived Resources
-
-If resources are derived from documents, Provenance SHOULD link to source DocumentReference:
+<!--
+ KAR 2026-09-08
+ FHIR=56640: source for derived resource could be DocumentReference or FHIR document bundle
+-->
+Derived resources SHOULD include a reference to their source, which may be a DocumentReference or a FHIR Document Bundle (Bundle.type = 'document').
 
 ```json
 {
@@ -113,6 +149,17 @@ If resources are derived from documents, Provenance SHOULD link to source Docume
   "entity": [{
     "role": "source",
     "what": {"reference": "DocumentReference/abc"}
+  }]
+}
+```
+
+```json
+{
+  "resourceType": "Provenance",
+  "target": [{"reference": "Observation/123"}],
+  "entity": [{
+    "role": "source",
+    "what": {"reference": "Bundle/abc"}
   }]
 }
 ```
